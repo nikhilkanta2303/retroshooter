@@ -18,18 +18,40 @@
             background: #000;
         }
 
-        #score {
+        #score, #lives, #toggleControls, #pauseButton {
             position: absolute;
-            top: 10px;
             left: 10px;
             font-size: 20px;
         }
 
-        #lives {
-            position: absolute;
+        #score {
             top: 10px;
-            right: 50px;
-            font-size: 20px;
+        }
+
+        #lives {
+            top: 40px;
+        }
+
+        #toggleControls {
+            top: 70px;
+            font-size: 16px;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        #pauseButton {
+            top: 100px;
+            font-size: 16px;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
         }
 
         #gameOver, #startGame {
@@ -82,30 +104,6 @@
         .control-button:hover {
             background-color: #ff4500;
         }
-
-        #toggleControls, #pauseButton {
-            position: absolute;
-            top: 40px;
-            font-size: 16px;
-            background-color: #ff6347;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-
-        #toggleControls:hover, #pauseButton:hover {
-            background-color: #ff4500;
-        }
-
-        #toggleControls {
-            left: 10px;
-        }
-
-        #pauseButton {
-            right: 10px;
-        }
     </style>
 </head>
 <body>
@@ -122,8 +120,8 @@
         <button id="startButton">Start</button>
     </div>
     <div id="controls">
-        <button class="control-button" id="leftButton">◀️</button>
-        <button class="control-button" id="rightButton">▶️;</button>
+        <button class="control-button" id="leftButton">&lt;</button>
+        <button class="control-button" id="rightButton">&gt;</button>
     </div>
     <canvas id="gameCanvas"></canvas>
     <script>
@@ -151,7 +149,7 @@
 
         function drawPlayer() {
             ctx.font = '30px Arial';
-            ctx.fillText('🚀', player.x, player.y);
+            ctx.fillText('✈️', player.x, player.y);
         }
 
         function drawBullets() {
@@ -296,10 +294,10 @@
             gamePaused = !gamePaused;
         }
 
-        document.getElementById('leftButton').addEventListener('mousedown', () => player.dx = -3);
-        document.getElementById('rightButton').addEventListener('mousedown', () => player.dx = 3);
-        document.getElementById('leftButton').addEventListener('mouseup', () => player.dx = 0);
-        document.getElementById('rightButton').addEventListener('mouseup', () => player.dx = 0);
+        document.getElementById('leftButton').addEventListener('touchstart', () => player.dx = -3);
+        document.getElementById('rightButton').addEventListener('touchstart', () => player.dx = 3);
+        document.getElementById('leftButton').addEventListener('touchend', () => player.dx = 0);
+        document.getElementById('rightButton').addEventListener('touchend', () => player.dx = 0);
 
         setInterval(shoot, 200);
 
