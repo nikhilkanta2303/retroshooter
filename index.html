@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Space Shooter</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        canvas {
+            display: block;
+            background: #000;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+        }
+
+        #lives {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            font-size: 20px;
+        }
+
+        #gameOver, #startGame {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #restartButton, #startButton {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #restartButton:hover, #startButton:hover {
+            background-color: #ff4500;
+        }
+
+        #controls {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            font-size: 20px;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        .control-button:hover {
+            background-color: #ff4500;
+        }
+
+        #toggleControls, #pauseButton {
+            position: absolute;
+            top: 40px;
+            font-size: 16px;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        #toggleControls:hover, #pauseButton:hover {
+            background-color: #ff4500;
+        }
+
+        #toggleControls {
+            left: 10px;
+        }
+
+        #pauseButton {
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    <div id="lives">❤️❤️❤️❤️❤️</div>
+    <button id="toggleControls">Toggle Controls</button>
+    <button id="pauseButton">⏸️</button>
+    <div id="gameOver">
+        <h2>Game Over</h2>
+        <button id="restartButton">Restart Game</button>
+    </div>
+    <div id="startGame">
+        <h2>Start Game</h2>
+        <button id="startButton">Start</button>
+    </div>
+    <div id="controls">
+        <button class="control-button" id="leftButton">&lt;</button>
+        <button class="control-button" id="rightButton">&gt;</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        let highestScore = 0;
+        let lives = 5;
+        let gameActive = false;
+        let gamePaused = false;
+
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 70,
+            width: 40,
+            height: 40,
+            dx: 0
+        };
+
+        const bullets = [];
+        const asteroids = [];
+
+        function drawPlayer() {
+            ctx.font = '30px Arial';
+            ctx.fillText('✈️', player.x, player.y);
+        }
+
+        function drawBullets() {
+            ctx.fillStyle = 'red';
+            bullets.forEach(bullet => {
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+        }
+
+        function drawAsteroids() {
+            ctx.font = '30px Arial';
+            asteroids.forEach(asteroid => {
+                ctx.fillText('🪨', asteroid.x, asteroid.y);
+            });
+        }
+
+        function update() {
+            if (!gameActive || gamePaused) return;
+
+            player.x += player.dx;
+
+            bullets.forEach((bullet, index) => {
+                bullet.y -= bullet.dy;
+                if (bullet.y < 0) {
+                    bullets.splice(index, 1);
+                }
+            });
+
+            asteroids.forEach((asteroid, index) => {
+                asteroid.y += asteroid.dy;
+                if (asteroid.y > canvas.height) {
+                    asteroids.splice(index, 1);
+                    lives--;
+                    updateLives();
+                    if (lives === 0) {
+                        gameOver();
+                    }
+                }
+            });
+
+            bullets.forEach((bullet, bIndex) => {
+                asteroids.forEach((asteroid, aIndex) => {
+                    if (
+                        bullet.x < asteroid.x + 30 &&
+                        bullet.x + bullet.width > asteroid.x &&
+                        bullet.y < asteroid.y + 30 &&
+                        bullet.y + bullet.height > asteroid.y
+                    ) {
+                        bullets.splice(bIndex, 1);
+                        asteroids.splice(aIndex, 1);
+                        score += 10;
+                        if (score > highestScore) {
+                            highestScore = score;
+                        }
+                    }
+                });
+            });
+
+            if (Math.random() < 0.01) {
+                asteroids.push({
+                    x: Math.random() * canvas.width,
+                    y: 0,
+                    dy: 1.5
+                });
+            }
+
+            document.getElementById('score').textContent = `Score: ${score} | Highest Score: ${highestScore}`;
+        }
+
+        function updateLives() {
+            document.getElementById('lives').textContent = '❤️'.repeat(lives);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function restartGame() {
+            score = 0;
+            lives = 5;
+            gameActive = true;
+            gamePaused = false;
+            bullets.length = 0;
+            asteroids.length = 0;
+            updateLives();
+            document.getElementById('gameOver').style.display = 'none';
+        }
+
+        function startGame() {
+            score = 0;
+            lives = 5;
+            gameActive = true;
+            gamePaused = false;
+            bullets.length = 0;
+            asteroids.length = 0;
+            updateLives();
+            document.getElementById('startGame').style.display = 'none';
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawBullets();
+            drawAsteroids();
+            update();
+            requestAnimationFrame(loop);
+        }
+
+        function keyDown(e) {
+            if (e.key === 'ArrowRight') {
+                player.dx = 3;
+            } else if (e.key === 'ArrowLeft') {
+                player.dx = -3;
+            }
+        }
+
+        function keyUp(e) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                player.dx = 0;
+            }
+        }
+
+        function shoot() {
+            if (gameActive && !gamePaused) {
+                bullets.push({
+                    x: player.x + player.width / 2 - 2.5,
+                    y: player.y,
+                    width: 5,
+                    height: 10,
+                    dy: 5
+                });
+            }
+        }
+
+        function toggleControls() {
+            const controls = document.getElementById('controls');
+            controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function togglePause() {
+            gamePaused = !gamePaused;
+        }
+
+        document.getElementById('leftButton').addEventListener('mousedown', () => player.dx = -3);
+        document.getElementById('rightButton').addEventListener('mousedown', () => player.dx = 3);
+        document.getElementById('leftButton').addEventListener('mouseup', () => player.dx = 0);
+        document.getElementById('rightButton').addEventListener('mouseup', () => player.dx = 0);
+
+        setInterval(shoot, 200);
+
+        window.addEventListener('keydown', keyDown);
+        window.addEventListener('keyup', keyUp);
+        document.getElementById('restartButton').addEventListener('click', restartGame);
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('toggleControls').addEventListener('click', toggleControls);
+        document.getElementById('pauseButton').addEventListener('click', togglePause);
+
+        document.getElementById('startGame').style.display = 'block';
+
+        loop();
+    </script>
+</body>
+</html>
