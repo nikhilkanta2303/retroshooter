@@ -122,8 +122,8 @@
         <button id="startButton">Start</button>
     </div>
     <div id="controls">
-        <button class="control-button" id="leftButton">&lt;</button>
-        <button class="control-button" id="rightButton">&gt;</button>
+        <button class="control-button" id="leftButton">◀️</button>
+        <button class="control-button" id="rightButton">▶️;</button>
     </div>
     <canvas id="gameCanvas"></canvas>
     <script>
@@ -151,7 +151,7 @@
 
         function drawPlayer() {
             ctx.font = '30px Arial';
-            ctx.fillText('✈️', player.x, player.y);
+            ctx.fillText('🚀', player.x, player.y);
         }
 
         function drawBullets() {
